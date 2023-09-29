@@ -7,19 +7,33 @@ const long bitrate{ 44100 };
 const int bitdepth{ 16 };
 const float pi{ 3.1416f };
 
+/* WIP; I think I'll store the list of all notes in a .txt file, then read them in when required to coordinate a given note to
+* the relevant frequency, then free the memory. Then the maths to find the harmonic series should be quite simple, then I can
+* feed that into some form of pattern class which will store the series and have a process to create the waveform vector.
+* then I'll just write that to file and Robbie's my uncle. */
+
 struct Note
 {
 	float freq{};
 	std::string note{};
 };
 
-class Harmonics
+class Harmonic_Series
 {
-/* WIP; I think I'll store the list of all notes in a .txt file, then read them in when required to coordinate a given note to
-* the relevant frequency, then free the memory. Then the maths to find the harmonic series should be quite simple, then I can 
-* feed that into some form of pattern class which will store the series and have a process to create the waveform vector.
-* then I'll just write that to file and Robbie's my uncle. */
 public:
+
+	float frequency{};
+	std::vector<float> m_series{};
+
+	void generate(float freq)
+	{
+		frequency = freq;
+
+		for (int i{}; m_series.at(i) <= 200000; i++)
+		{
+			m_series.push_back(frequency * i);
+		}
+	}
 
 };
 
