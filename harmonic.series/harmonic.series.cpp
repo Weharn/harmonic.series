@@ -258,12 +258,17 @@ Note getNote()
 	std::cout << "Enter a note: ";
 	std::cin >> note_input;
 
-	if (note_input.size() == 3)				//this only accoutns for sharps not flats
+	if (note_input.size() == 3)
 	{
 		if (note_input[1] == '#')
 		{
 			note.name[0] = static_cast<char>(note_input[0] + 1);
 			note.name[1] = 'b';
+		}
+		else
+		{
+			note.name[0] = note_input[0];
+			note.name[1] = note_input[1];
 		}
 
 		note.octave = note_input[2] - 48;
@@ -334,6 +339,11 @@ Note getNote()
 			std::cerr << "Invalding note inputted (i.e. Q)";
 			std::abort();
 		}
+	}
+	else
+	{
+		std::cerr << "Incorrect note input (i.e. F-flat, or Q). Specifially, wrong number of characters in note name.";
+		std::abort();
 	}
 
 	std::ifstream ifs("frequencies.txt");
