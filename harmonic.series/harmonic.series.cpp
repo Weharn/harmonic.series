@@ -266,11 +266,73 @@ Note getNote()
 		}
 
 		note.octave = note_input[2];
+
+		switch (note.name[0])
+		{
+		case 'D':
+			note.number = 2;
+			break;
+
+		case 'E':
+			note.number = 4;
+			break;
+
+		case 'G':
+			note.number = 7;
+			break;
+
+		case 'A':
+			note.number = 9;
+			break;
+
+		case 'B':
+			note.number = 11;
+			break;
+
+		default:
+			std::cerr << "Incorrect note input (i.e. F-flat, or Q).";
+			std::abort();
+		}
 	}
 	else if (note_input.size() == 2)
 	{
 		note.name[0] = note_input[0];
 		note.octave = note_input[1];
+
+		switch (note.name[0])
+		{
+		case 'C': 
+			note.number = 1;
+			break;
+
+		case 'D':
+			note.number = 3;
+			break;
+
+		case 'E':
+			note.number = 5;
+			break;
+
+		case 'F':
+			note.number = 6;
+			break;
+
+		case 'G':
+			note.number = 8;
+			break;
+
+		case 'A':
+			note.number = 10;
+			break;
+
+		case 'B': 
+			note.number = 12;
+			break;
+
+		default:
+			std::cerr << "Invalding note inputted (i.e. Q)";
+			std::abort();
+		}
 	}
 
 	std::ifstream ifs("frequencies.txt");
