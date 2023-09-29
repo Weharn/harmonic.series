@@ -7,9 +7,8 @@ const long bitrate{ 44100 };
 const int bitdepth{ 16 };
 const float pi{ 3.1416f };
 
-/* WIP; I think I'll store the list of all notes in a .txt file, then read them in when required to coordinate a given note to
-* the relevant frequency, then free the memory. Then the maths to find the harmonic series should be quite simple, then I can
-* feed that into some form of pattern class which will store the series and have a process to create the waveform vector.
+/* WIP. getting all inital frequency data from the file is done. Then the maths to find the harmonic series should be quite simple, then 
+* I can feed that into some form of pattern class which will store the series and have a process to create the waveform vector.
 * then I'll just write that to file and Robbie's my uncle. */
 
 struct Note
