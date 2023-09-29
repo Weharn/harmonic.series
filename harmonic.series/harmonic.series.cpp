@@ -15,7 +15,9 @@ const float pi{ 3.1416f };
 struct Note
 {
 	float freq{};
-	std::string note{};
+	char name[2];
+	short octave{};
+	short number{};
 };
 
 class Harmonic_Series
@@ -246,6 +248,41 @@ public:
 	}
 
 };
+
+Note getNote()
+{
+	std::string note_input{};
+	Note note{};
+
+	std::cout << "Enter a note: ";
+	std::cin >> note_input;
+	
+	if (note_input.size() == 3)				//this only accoutns for sharps not flats
+	{
+		if (note_input[1] == '#')
+		{
+			note.name[0] = static_cast<char>(note_input[0] + 1);
+			note.name[1] = 'b';
+		}
+
+		note.octave = note_input[2];
+	}
+	else if (note_input.size() == 2)
+	{
+		note.name[0] = note_input[0];
+		note.octave = note_input[1];
+	}
+
+	std::ifstream ifs("frequencies.txt");
+
+	if (!ifs)
+	{
+		std::cerr << "Error opening the file frequencies.txt; please check the path.";
+		std::abort();
+	}
+
+
+}
 
 int main()
 {
