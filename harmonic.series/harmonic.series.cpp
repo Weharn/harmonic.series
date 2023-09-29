@@ -14,9 +14,9 @@ const float pi{ 3.1416f };
 
 struct Note
 {
-	float freq{};
+	double freq{};
 	char name[2];
-	short octave{};
+	int octave{};
 	short number{};
 };
 
@@ -252,11 +252,12 @@ public:
 Note getNote()
 {
 	std::string note_input{};
+	std::string file_freq{};
 	Note note{};
 
 	std::cout << "Enter a note: ";
 	std::cin >> note_input;
-	
+
 	if (note_input.size() == 3)				//this only accoutns for sharps not flats
 	{
 		if (note_input[1] == '#')
@@ -265,16 +266,56 @@ Note getNote()
 			note.name[1] = 'b';
 		}
 
-		note.octave = note_input[2];
+		note.octave = note_input[2] - 48;
 
 		switch (note.name[0])
 		{
+		case 'D':
+			note.number = 1;
+			break;
+
+		case 'E':
+			note.number = 3;
+			break;
+
+		case 'G':
+			note.number = 6;
+			break;
+
+		case 'A':
+			note.number = 8;
+			break;
+
+		case 'B':
+			note.number = 10;
+			break;
+
+		default:
+			std::cerr << "Incorrect note input (i.e. F-flat, or Q).";
+			std::abort();
+		}
+	}
+	else if (note_input.size() == 2)
+	{
+		note.name[0] = note_input[0];
+		note.octave = note_input[1] - 48;
+
+		switch (note.name[0])
+		{
+		case 'C':
+			note.number = 0;
+			break;
+
 		case 'D':
 			note.number = 2;
 			break;
 
 		case 'E':
 			note.number = 4;
+			break;
+
+		case 'F':
+			note.number = 5;
 			break;
 
 		case 'G':
@@ -287,46 +328,6 @@ Note getNote()
 
 		case 'B':
 			note.number = 11;
-			break;
-
-		default:
-			std::cerr << "Incorrect note input (i.e. F-flat, or Q).";
-			std::abort();
-		}
-	}
-	else if (note_input.size() == 2)
-	{
-		note.name[0] = note_input[0];
-		note.octave = note_input[1];
-
-		switch (note.name[0])
-		{
-		case 'C': 
-			note.number = 1;
-			break;
-
-		case 'D':
-			note.number = 3;
-			break;
-
-		case 'E':
-			note.number = 5;
-			break;
-
-		case 'F':
-			note.number = 6;
-			break;
-
-		case 'G':
-			note.number = 8;
-			break;
-
-		case 'A':
-			note.number = 10;
-			break;
-
-		case 'B': 
-			note.number = 12;
 			break;
 
 		default:
@@ -343,10 +344,21 @@ Note getNote()
 		std::abort();
 	}
 
+	ifs.seekg((note.number * 76) + (note.octave * 8) + 3);
 
+	std::getline(ifs, file_freq, ',');
+
+	note.freq = std::stof(file_freq);
+
+	return note;
 }
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	Note note{ getNote() };
+
+	std::cout << "The frequency of the specified note is: " << note.freq << "Hz\n";
+
+	return 0;
+
 }
