@@ -218,9 +218,50 @@ public:
 		}
 	}
 
-	void rcv_merge_series(float amplitude, float duration)
+	void merge_series(std::ofstream& ofs, float amplitude, float duration)
 	{
-		double merge
+		for (int i{ 1 }; i < m_series.size(); ++i)
+		{
+			if (i == 1)
+			{
+				Sine sine{};
+				sine.init(amplitude, m_series[i], duration);
+				sine.write(ofs);
+			}
+			else if (i == 2)
+			{
+				Sine sine1{};
+				sine1.init(amplitude, m_series[i - 1], duration);
+				Sine sine2 {};
+				sine2.init(amplitude, m_series[i], duration);
+
+				auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };		//modifier to take the range from -1 to 1 to -32767 to 32767
+
+				for (int i{}; i < (bitrate * duration); ++i)
+				{	
+					//does the final modification and casts the sample to an int as required
+					int sample{ static_cast<int>(((sine1.gen_sine() * 0.5) + (sine2.gen_sine() * 0.5)) * amplmod)};		
+
+					ofs.write((reinterpret_cast<char*>(&sample)), 2);
+				}
+
+				m_postwr_pos = ofs.tellp();
+			}
+			else if (i > 2 && i < m_series.size())
+			{
+				auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };		//modifier to take the range from -1 to 1 to -32767 to 32767
+				std::vector<Sine> series_vec{};						//a vector of sine objects. The plan is that they will all be .gen_sine 'd simultaneously and added every cycle
+
+				for (int j{ 1 }; j <= i; ++j)						//initialises the correct number of objects to the correct frequencies withing series_vec
+				{
+					Sine sine{};
+					sine.init(amplitude, m_series[j], duration);
+
+					series_vec.push_back(sine);
+				}
+
+			}
+		}
 	}
 
 };
