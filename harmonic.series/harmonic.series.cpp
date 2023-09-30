@@ -15,9 +15,9 @@ class Note
 {
 public:
 	double m_freq{};
-	char m_name[2];
-	int m_octave{};
-	short m_number{};
+	char m_name[2];					//using a c-style array here to allow me to use switch statements later
+	int m_octave{};					
+	short m_number{};				//which number a note is in the octave (0-11); allows skipping through the file much more easily.
 
 	void get_note()
 	{
@@ -27,14 +27,14 @@ public:
 		std::cout << "Enter a note: ";
 		std::cin >> note_input;
 
-		if (note_input.size() == 3)
+		if (note_input.size() == 3)					//if the note has a sharp or flat
 		{
-			if (note_input[1] == '#')
+			if (note_input[1] == '#')				//if it's sharp
 			{
-				m_name[0] = static_cast<char>(note_input[0] + 1);
+				m_name[0] = static_cast<char>(note_input[0] + 1);	//changes it to be the note above but flattened, as all notes are stored as flattened naturals.
 				m_name[1] = 'b';
-			}
-			else if (note_input[1] = 'b')
+			}										
+			else if (note_input[1] = 'b') 			//if it's flat
 			{
 				m_name[0] = note_input[0];
 				m_name[1] = note_input[1];
@@ -74,7 +74,7 @@ public:
 				std::abort();
 			}
 		}
-		else if (note_input.size() == 2)
+		else if (note_input.size() == 2)				//if the note is a natural
 		{
 			m_name[0] = note_input[0];
 			m_octave = note_input[1] - 48;
@@ -128,11 +128,11 @@ public:
 			std::abort();
 		}
 
-		ifs.seekg((m_number * 76) + (m_octave * 8) + 3);
-
+		ifs.seekg((m_number * 76) + (m_octave * 8) + 3);			//skips to the right collection of octaves (notes are in 76-character chunks)
+																	//and the right octave within the collection (individual notes are in 8-character words)
 		std::getline(ifs, file_freq, ',');
 
-		m_freq = std::stof(file_freq);
+		m_freq = std::stof(file_freq);								//changes the string input into the float frequency
 	}
 };
 
@@ -143,11 +143,11 @@ public:
 	float frequency{};
 	std::vector<float> m_series{};
 
-	void generate(float freq)
+	void generate(float freq)					//generates the harmonic series
 	{
 		frequency = freq;
 
-		for (int i{}; m_series.at(i) <= 200000; i++)
+		for (int i{}; m_series.at(i) <= 100000; i++)
 		{
 			m_series.push_back(frequency * i);
 		}
@@ -159,8 +159,8 @@ class Sine
 {
 private:
 
-	float m_angle{};
-	float m_step{};
+	float m_angle{};		//the current "angle" of the sine wave
+	float m_step{};			//the "step" (increase in angle per iteration)
 
 public:
 
@@ -169,7 +169,7 @@ public:
 	float m_frequency{};
 	float m_duration{};
 
-	void init(float ampl, float freq, float durn)
+	void init(float ampl, float freq, float durn)			//initialises all the variables and the step value
 	{
 		m_amplitude = ampl;
 		m_frequency = freq;
@@ -177,8 +177,8 @@ public:
 		m_step = sin(2 * pi * (m_frequency / bitrate));
 	}
 
-	float gen_sine()
-	{
+	float gen_sine()										//generates an indiviual sample (range: -1 to 1), then increments the angle by the step
+	{	
 		float sample{ sin(m_angle) };
 
 		m_angle += m_step;
@@ -186,15 +186,15 @@ public:
 		return sample;
 	}
 
-	void write(std::ofstream& ofs)
+	void write(std::ofstream& ofs)							//writes the wave to file directly
 	{
-		auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };
+		auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };		//modifier to take the range from -1 to 1 to -32767 to 32767
 
 		for (int i{}; i < (bitrate * m_duration); ++i)
 		{
-			int isample{ static_cast<int>(gen_sine() * amplmod) };
+			int sample{ static_cast<int>(gen_sine() * amplmod) };		//does the final modification and casts the sample to an int as required
 
-			ofs.write((reinterpret_cast<char*>(&isample)), 2);
+			ofs.write((reinterpret_cast<char*>(&sample)), 2);
 		}
 
 		m_postwr_pos = ofs.tellp();
@@ -204,14 +204,14 @@ public:
 class Header
 {
 public:
-	int m_preaudiop{};
-	std::ofstream& ofs;
+	int m_preaudiop{};									//records the position in the file before audio is written
+	std::ofstream& ofs;									//creates the filestream reference
 
-	Header(std::ofstream& tmpofs) : ofs{ tmpofs }
+	Header(std::ofstream& tmpofs) : ofs{ tmpofs }		//initialises the filestream reference
 	{
 	}
 
-	template <typename T>
+	template <typename T>								//template for writing general information to the filstream
 	void writeofs(std::ofstream& ofs, T value, int size)
 	{
 		ofs.write(reinterpret_cast<const char*> (&value), size);
@@ -238,10 +238,10 @@ public:
 		ofs << "data";
 		ofs << "----";
 
-		m_preaudiop = ofs.tellp();
+		m_preaudiop = ofs.tellp();						//records the position in the file before audio is written
 	}
 
-	void header_c(int postaudiop)
+	void header_c(int postaudiop)						//writes in the footer
 	{
 		ofs.seekp(m_preaudiop - 4);
 		writeofs(ofs, postaudiop - m_preaudiop, 4);
