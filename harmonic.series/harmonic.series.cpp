@@ -274,6 +274,11 @@ public:
 					ofs.write((reinterpret_cast<char*>(&sample)), 2);					//writes to file
 				}
 			}
+			else
+			{
+				std::cerr << "i out of range. wth even happened to do that. it's 1:48am.";
+				std::abort();
+			}
 		}
 
 		m_postwr_pos = ofs.tellp();
