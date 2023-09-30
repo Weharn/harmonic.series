@@ -190,15 +190,15 @@ public:
 	int m_postwr_pos{};	
 	std::vector<float> m_series{ 0 };
 
-	void ovt_generate()					//generates the harmonic series
+	void ovt_generate()					//generates the overtone harmonic series
 	{
 		for (int i{ 1 }; i <= 16; i++)
 		{
 			m_series.push_back(m_frequency * i);
 		}
-	}
+	}   
 
-	void undt_generation()
+	void undt_generation()				//generates the undertone harmonic series
 	{
 		for (float i{ 1 }; i <= 16.05; i += 1)
 		{
@@ -206,7 +206,7 @@ public:
 		}
 	}
 
-	void add_series(std::ofstream& ofs, float amplitude, float duration)
+	void add_series(std::ofstream& ofs, float amplitude, float duration)			//writes the series directly to a file
 	{
 		for (int i{ 1 }; i < m_series.size(); ++i)
 		{
@@ -216,6 +216,11 @@ public:
 
 			m_postwr_pos = sine.m_postwr_pos;
 		}
+	}
+
+	void rcv_merge_series(float amplitude, float duration)
+	{
+		double merge
 	}
 
 };
