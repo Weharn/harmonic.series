@@ -140,16 +140,14 @@ class Harmonic_Series
 {
 public:
 
-	float frequency{};
+	float m_frequency{};
 	std::vector<float> m_series{};
 
-	void generate(float freq)					//generates the harmonic series
+	void generate()					//generates the harmonic series
 	{
-		frequency = freq;
-
 		for (int i{}; m_series.at(i) <= 100000; i++)
 		{
-			m_series.push_back(frequency * i);
+			m_series.push_back(m_frequency * i);
 		}
 	}
 
@@ -254,19 +252,31 @@ public:
 
 int main()
 {
+	float duration{ 2 };
+	float amplitude{ 0.75 };
+	int postwr_pos{};
+
 	Note note{};
 	note.get_note();
-
-	Sine sine{};
-	sine.init(0.8, note.m_freq, 10);
 
 	std::ofstream ofs{};
 	ofs.open(("C:\\Users\\finnv\\source\\repos\\harmonic.series\\harmonic.series\\fundamental_tone.wav"), std::ios::binary);
 
 	Header header(ofs);
 	header.header_i();
-	sine.write(ofs);
-	header.header_c(sine.m_postwr_pos);
+
+	Harmonic_Series series{ note.m_freq };
+
+	for (int i{}; i < series.m_series.size(); ++i)
+	{
+		Sine sine{};
+		sine.init(amplitude, series.m_series[i], duration);
+		sine.write(ofs);
+
+		postwr_pos = sine.m_postwr_pos;
+	}
+
+	header.header_c(postwr_pos);
 
 	std::cout << "Done!";
 
