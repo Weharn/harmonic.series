@@ -11,12 +11,124 @@ const float pi{ 3.1416f };
 * I can feed that into some form of pattern class which will store the series and have a process to create the waveform vector.
 * then I'll just write that to file and Robbie's my uncle. */
 
-struct Note
+class Note
 {
+public:
 	double freq{};
 	char name[2];
 	int octave{};
 	short number{};
+
+	void getNote()
+	{
+		std::string note_input{};
+		std::string file_freq{};
+
+		std::cout << "Enter a note: ";
+		std::cin >> note_input;
+
+		if (note_input.size() == 3)
+		{
+			if (note_input[1] == '#')
+			{
+				name[0] = static_cast<char>(note_input[0] + 1);
+				name[1] = 'b';
+			}
+			else
+			{
+				name[0] = note_input[0];
+				name[1] = note_input[1];
+			}
+
+			octave = note_input[2] - 48;
+
+			switch (name[0])
+			{
+			case 'D':
+				number = 1;
+				break;
+
+			case 'E':
+				number = 3;
+				break;
+
+			case 'G':
+				number = 6;
+				break;
+
+			case 'A':
+				number = 8;
+				break;
+
+			case 'B':
+				number = 10;
+				break;
+
+			default:
+				std::cerr << "Incorrect note input (i.e. F-flat, or Q).";
+				std::abort();
+			}
+		}
+		else if (note_input.size() == 2)
+		{
+			name[0] = note_input[0];
+			octave = note_input[1] - 48;
+
+			switch (name[0])
+			{
+			case 'C':
+				number = 0;
+				break;
+
+			case 'D':
+				number = 2;
+				break;
+
+			case 'E':
+				number = 4;
+				break;
+
+			case 'F':
+				number = 5;
+				break;
+
+			case 'G':
+				number = 7;
+				break;
+
+			case 'A':
+				number = 9;
+				break;
+
+			case 'B':
+				number = 11;
+				break;
+
+			default:
+				std::cerr << "Invalding note inputted (i.e. Q)";
+				std::abort();
+			}
+		}
+		else
+		{
+			std::cerr << "Incorrect note input (i.e. F-flat, or Q). Specifially, wrong number of characters in note name.";
+			std::abort();
+		}
+
+		std::ifstream ifs("frequencies.txt");
+
+		if (!ifs)
+		{
+			std::cerr << "Error opening the file frequencies.txt; please check the path.";
+			std::abort();
+		}
+
+		ifs.seekg((number * 76) + (octave * 8) + 3);
+
+		std::getline(ifs, file_freq, ',');
+
+		freq = std::stof(file_freq);
+	}
 };
 
 class Harmonic_Series
