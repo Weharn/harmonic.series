@@ -141,11 +141,11 @@ class Harmonic_Series
 public:
 
 	float m_frequency{};
-	std::vector<float> m_series{};
+	std::vector<float> m_series{ 0 };
 
 	void generate()					//generates the harmonic series
 	{
-		for (int i{}; m_series.at(i) <= 100000; i++)
+		for (int i{ 1 }; i <= 17; i++)
 		{
 			m_series.push_back(m_frequency * i);
 		}
@@ -266,6 +266,7 @@ int main()
 	header.header_i();
 
 	Harmonic_Series series{ note.m_freq };
+	series.generate();
 
 	for (int i{}; i < series.m_series.size(); ++i)
 	{
