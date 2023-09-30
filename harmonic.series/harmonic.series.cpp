@@ -166,7 +166,7 @@ public:
 
 	int m_postwr_pos{};
 	float m_amplitude{};
-	float m_frequency;
+	float m_frequency{};
 	float m_duration{};
 
 	void init(float ampl, float freq, float durn)
@@ -258,7 +258,7 @@ int main()
 	note.get_note();
 
 	Sine sine{};
-	sine.init(1, note.m_freq, 10);
+	sine.init(0.8, note.m_freq, 10);
 
 	std::ofstream ofs{};
 	ofs.open(("C:\\Users\\finnv\\source\\repos\\harmonic.series\\harmonic.series\\fundamental_tone.wav"), std::ios::binary);
