@@ -164,23 +164,16 @@ private:
 
 public:
 
-	std::vector<float> m_amplitude{};
-	std::vector<float> m_sinevec{};
 	int m_postwr_pos{};
+	float m_amplitude{};
 	float m_frequency{};
 	float m_duration{};
 
-	void init(std::vector<float> ampl, float freq, float durn)
+	void init(float ampl, float freq, float durn)
 	{
 		m_step = sin(2 * pi * (m_frequency / bitrate));
 		m_amplitude = ampl;
 		m_frequency = freq;
-		m_duration = durn;
-	}
-
-	void init(float durn)
-	{
-		m_step = sin(2 * pi * (m_frequency / bitrate));
 		m_duration = durn;
 	}
 
@@ -193,119 +186,13 @@ public:
 		return sample;
 	}
 
-	void sine_vec()
-	{
-		float cycles{ m_duration * bitrate };
-
-		for (int i{}; i < cycles; ++i)
-		{
-			m_sinevec.push_back(gen_sine());
-		}
-	}
-
 	void write(std::ofstream& ofs)
 	{
 		auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };
 
 		for (int i{}; i < (bitrate * m_duration); ++i)
 		{
-			auto fsample{ m_sinevec[i] * amplmod };
-			int isample{ static_cast<int>(fsample) };
-
-			ofs.write((reinterpret_cast<char*>(&isample)), 2);
-		}
-
-		m_postwr_pos = ofs.tellp();
-	}
-};
-
-class Master
-{
-public:
-
-	int m_postwr_pos{};
-	std::vector<float> m_master_vec{};
-
-	void add(Sine& wave)															//adds a Sine object to m_master_vec
-	{
-		for (int i{}; i < wave.m_sinevec.size(); ++i)
-		{
-			m_master_vec.push_back(wave.m_sinevec[i]);
-		}
-	}
-
-	void merge(Master& master1, Master& master2)													//merges two Master objects into m_master_vec
-	{
-		int i{};
-		int larger_c{};
-
-		if (master1.m_master_vec.size() < master2.m_master_vec.size())
-		{
-			larger_c = 0;
-		}
-		else if (master1.m_master_vec.size() > master2.m_master_vec.size())
-		{
-			larger_c = 1;
-		}
-		else
-		{
-			larger_c = 2;
-		}
-
-		size_t m1size{ master1.m_master_vec.size() };
-		size_t m2size{ master2.m_master_vec.size() };
-
-		if (larger_c == 0)
-		{
-			while (i < m1size)
-			{
-				m_master_vec.push_back((master1.m_master_vec[i] + master2.m_master_vec[i]) * 0.5);
-
-				++i;
-			}
-
-			while (i < m2size)
-			{
-				m_master_vec.push_back(master2.m_master_vec[i]);
-
-				++i;
-			}
-
-		}
-		else if (larger_c == 1)
-		{
-			while (i < m2size)
-			{
-				m_master_vec.push_back((master1.m_master_vec[i] + master2.m_master_vec[i]) * 0.5);
-
-				++i;
-			}
-
-			while (i < m1size)
-			{
-				m_master_vec.push_back(master1.m_master_vec[i]);
-
-				++i;
-			}
-		}
-		else
-		{
-			for (int i{}; i < m1size; ++i)
-			{
-				m_master_vec.push_back((master1.m_master_vec[i] + master2.m_master_vec[i]) * 0.5);
-			}
-		}
-	}
-
-	void write(std::ofstream& ofs)
-	{
-		auto amplmod{ pow(2, (bitdepth - 1)) - 1 };
-		int mvec_size{ static_cast<int>(m_master_vec.size()) };
-
-		for (int i{}; i < mvec_size; ++i)
-		{
-			auto fsample{ m_master_vec[i] * amplmod };
-			int isample{ static_cast<int>(fsample) };
+			int isample{ static_cast<int>(gen_sine() * amplmod) };
 
 			ofs.write((reinterpret_cast<char*>(&isample)), 2);
 		}
