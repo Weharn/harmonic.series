@@ -198,6 +198,14 @@ public:
 		}
 	}
 
+	void undt_generation()
+	{
+		for (float i{ 1 }; i <= 16.05; i += 1)
+		{
+			m_series.push_back(m_frequency * (1/i));
+		}
+	}
+
 	void add_series(std::ofstream& ofs, float amplitude, float duration)
 	{
 		for (int i{ 1 }; i < m_series.size(); ++i)
