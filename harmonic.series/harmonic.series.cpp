@@ -14,12 +14,12 @@ const float pi{ 3.1416f };
 class Note
 {
 public:
-	double freq{};
-	char name[2];
-	int octave{};
-	short number{};
+	double m_freq{};
+	char m_name[2];
+	int m_octave{};
+	short m_number{};
 
-	void getNote()
+	void get_note()
 	{
 		std::string note_input{};
 		std::string file_freq{};
@@ -31,37 +31,42 @@ public:
 		{
 			if (note_input[1] == '#')
 			{
-				name[0] = static_cast<char>(note_input[0] + 1);
-				name[1] = 'b';
+				m_name[0] = static_cast<char>(note_input[0] + 1);
+				m_name[1] = 'b';
+			}
+			else if (note_input[1] = 'b')
+			{
+				m_name[0] = note_input[0];
+				m_name[1] = note_input[1];
 			}
 			else
 			{
-				name[0] = note_input[0];
-				name[1] = note_input[1];
+				std::cerr << "Invalid modifier on note (i.e. D@ instead of D#)";
+				std::abort();
 			}
 
-			octave = note_input[2] - 48;
+			m_octave = note_input[2] - 48;
 
-			switch (name[0])
+			switch (m_name[0])
 			{
 			case 'D':
-				number = 1;
+				m_number = 1;
 				break;
 
 			case 'E':
-				number = 3;
+				m_number = 3;
 				break;
 
 			case 'G':
-				number = 6;
+				m_number = 6;
 				break;
 
 			case 'A':
-				number = 8;
+				m_number = 8;
 				break;
 
 			case 'B':
-				number = 10;
+				m_number = 10;
 				break;
 
 			default:
@@ -71,37 +76,37 @@ public:
 		}
 		else if (note_input.size() == 2)
 		{
-			name[0] = note_input[0];
-			octave = note_input[1] - 48;
+			m_name[0] = note_input[0];
+			m_octave = note_input[1] - 48;
 
-			switch (name[0])
+			switch (m_name[0])
 			{
 			case 'C':
-				number = 0;
+				m_number = 0;
 				break;
 
 			case 'D':
-				number = 2;
+				m_number = 2;
 				break;
 
 			case 'E':
-				number = 4;
+				m_number = 4;
 				break;
 
 			case 'F':
-				number = 5;
+				m_number = 5;
 				break;
 
 			case 'G':
-				number = 7;
+				m_number = 7;
 				break;
 
 			case 'A':
-				number = 9;
+				m_number = 9;
 				break;
 
 			case 'B':
-				number = 11;
+				m_number = 11;
 				break;
 
 			default:
@@ -123,11 +128,11 @@ public:
 			std::abort();
 		}
 
-		ifs.seekg((number * 76) + (octave * 8) + 3);
+		ifs.seekg((m_number * 76) + (m_octave * 8) + 3);
 
 		std::getline(ifs, file_freq, ',');
 
-		freq = std::stof(file_freq);
+		m_freq = std::stof(file_freq);
 	}
 };
 
@@ -360,125 +365,13 @@ public:
 
 };
 
-Note getNote()
-{
-	std::string note_input{};
-	std::string file_freq{};
-	Note note{};
-
-	std::cout << "Enter a note: ";
-	std::cin >> note_input;
-
-	if (note_input.size() == 3)
-	{
-		if (note_input[1] == '#')
-		{
-			note.name[0] = static_cast<char>(note_input[0] + 1);
-			note.name[1] = 'b';
-		}
-		else
-		{
-			note.name[0] = note_input[0];
-			note.name[1] = note_input[1];
-		}
-
-		note.octave = note_input[2] - 48;
-
-		switch (note.name[0])
-		{
-		case 'D':
-			note.number = 1;
-			break;
-
-		case 'E':
-			note.number = 3;
-			break;
-
-		case 'G':
-			note.number = 6;
-			break;
-
-		case 'A':
-			note.number = 8;
-			break;
-
-		case 'B':
-			note.number = 10;
-			break;
-
-		default:
-			std::cerr << "Incorrect note input (i.e. F-flat, or Q).";
-			std::abort();
-		}
-	}
-	else if (note_input.size() == 2)
-	{
-		note.name[0] = note_input[0];
-		note.octave = note_input[1] - 48;
-
-		switch (note.name[0])
-		{
-		case 'C':
-			note.number = 0;
-			break;
-
-		case 'D':
-			note.number = 2;
-			break;
-
-		case 'E':
-			note.number = 4;
-			break;
-
-		case 'F':
-			note.number = 5;
-			break;
-
-		case 'G':
-			note.number = 7;
-			break;
-
-		case 'A':
-			note.number = 9;
-			break;
-
-		case 'B':
-			note.number = 11;
-			break;
-
-		default:
-			std::cerr << "Invalding note inputted (i.e. Q)";
-			std::abort();
-		}
-	}
-	else
-	{
-		std::cerr << "Incorrect note input (i.e. F-flat, or Q). Specifially, wrong number of characters in note name.";
-		std::abort();
-	}
-
-	std::ifstream ifs("frequencies.txt");
-
-	if (!ifs)
-	{
-		std::cerr << "Error opening the file frequencies.txt; please check the path.";
-		std::abort();
-	}
-
-	ifs.seekg((note.number * 76) + (note.octave * 8) + 3);
-
-	std::getline(ifs, file_freq, ',');
-
-	note.freq = std::stof(file_freq);
-
-	return note;
-}
-
 int main()
 {
-	Note note{ getNote() };
+	Note note{};
 
-	std::cout << "The frequency of the specified note is: " << note.freq << "Hz\n";
+	note.get_note();
+
+	std::cout << "The frequency of the specified note is: " << note.m_freq << "Hz\n";
 
 	return 0;
 
