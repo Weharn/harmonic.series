@@ -166,15 +166,15 @@ public:
 
 	int m_postwr_pos{};
 	float m_amplitude{};
-	float m_frequency{};
+	float m_frequency;
 	float m_duration{};
 
 	void init(float ampl, float freq, float durn)
 	{
-		m_step = sin(2 * pi * (m_frequency / bitrate));
 		m_amplitude = ampl;
 		m_frequency = freq;
 		m_duration = durn;
+		m_step = sin(2 * pi * (m_frequency / bitrate));
 	}
 
 	float gen_sine()
