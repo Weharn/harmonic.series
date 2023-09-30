@@ -220,9 +220,9 @@ public:
 
 	void merge_series(std::ofstream& ofs, float amplitude, float duration)
 	{
-		for (int i{ 1 }; i < m_series.size(); ++i)
+		for (int i{ 1 }; i < m_series.size(); ++i)					//this loop runs through every harmonic
 		{
-			if (i == 1)
+			if (i == 1)												//these first two if statements are just to reduce some of the load when it is less necessary
 			{
 				Sine sine{};
 				sine.init(amplitude, m_series[i], duration);
