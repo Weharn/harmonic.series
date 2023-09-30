@@ -244,8 +244,6 @@ public:
 
 					ofs.write((reinterpret_cast<char*>(&sample)), 2);
 				}
-
-				m_postwr_pos = ofs.tellp();
 			}
 			else if (i > 2 && i < m_series.size())
 			{
@@ -260,8 +258,25 @@ public:
 					series_vec.push_back(sine);
 				}
 
+				double vecsize_recip{ 1 / static_cast<double>(series_vec.size()) };		//saves having to keep redoing some intensive work
+
+				for (int j{}; j < (bitrate * duration); ++j)
+				{
+					double sum{};														//current sum of all the sine objects within the vector for a given step
+
+					for (int k{}; k < series_vec.size(); ++k)
+					{
+						sum += vecsize_recip * series_vec.at(k).gen_sine();				//adds the balanced amount of whatever the value of one of the sine objects in series_vec is to sum
+					}
+
+					int sample{ static_cast<int>(sum * amplmod) };						//prepares sum for writing to file
+
+					ofs.write((reinterpret_cast<char*>(&sample)), 2);					//writes to file
+				}
 			}
 		}
+
+		m_postwr_pos = ofs.tellp();
 	}
 
 };
