@@ -255,11 +255,20 @@ public:
 int main()
 {
 	Note note{};
-
 	note.get_note();
 
-	std::cout << "The frequency of the specified note is: " << note.m_freq << "Hz\n";
+	Sine sine{};
+	sine.init(1, note.m_freq, 10);
+
+	std::ofstream ofs{};
+	ofs.open(("C:\\Users\\finnv\\source\\repos\\harmonic.series\\harmonic.series\\fundamental_tone.wav"), std::ios::binary);
+
+	Header header(ofs);
+	header.header_i();
+	sine.write(ofs);
+	header.header_c(sine.m_postwr_pos);
+
+	std::cout << "Done!";
 
 	return 0;
-
 }
