@@ -136,23 +136,6 @@ public:
 	}
 };
 
-class Harmonic_Series
-{
-public:
-
-	float m_frequency{};
-	std::vector<float> m_series{ 0 };
-
-	void generate()					//generates the harmonic series
-	{
-		for (int i{ 1 }; i <= 17; i++)
-		{
-			m_series.push_back(m_frequency * i);
-		}
-	}
-
-};
-
 class Sine
 {
 private:
@@ -176,7 +159,7 @@ public:
 	}
 
 	float gen_sine()										//generates an indiviual sample (range: -1 to 1), then increments the angle by the step
-	{	
+	{
 		float sample{ sin(m_angle) };
 
 		m_angle += m_step;
@@ -197,6 +180,36 @@ public:
 
 		m_postwr_pos = ofs.tellp();
 	}
+};
+
+class Harmonic_Series
+{
+public:
+
+	float m_frequency{};
+	int m_postwr_pos{};	
+	std::vector<float> m_series{ 0 };
+
+	void ovt_generate()					//generates the harmonic series
+	{
+		for (int i{ 1 }; i <= 16; i++)
+		{
+			m_series.push_back(m_frequency * i);
+		}
+	}
+
+	void add_series(std::ofstream& ofs, float amplitude, float duration)
+	{
+		for (int i{ 1 }; i < m_series.size(); ++i)
+		{
+			Sine sine{};
+			sine.init(amplitude, m_series[i], duration);
+			sine.write(ofs);
+
+			m_postwr_pos = sine.m_postwr_pos;
+		}
+	}
+
 };
 
 class Header
@@ -252,7 +265,7 @@ public:
 
 int main()
 {
-	float duration{ 2 };
+	double duration{ 2 };
 	float amplitude{ 0.75 };
 	int postwr_pos{};
 
@@ -260,22 +273,15 @@ int main()
 	note.get_note();
 
 	std::ofstream ofs{};
-	ofs.open(("C:\\Users\\finnv\\source\\repos\\harmonic.series\\harmonic.series\\fundamental_tone.wav"), std::ios::binary);
+	ofs.open(("C:\\Users\\finnv\\source\\repos\\harmonic.series\\harmonic.series\\harmonic.series.wav"), std::ios::binary);
 
 	Header header(ofs);
 	header.header_i();
 
 	Harmonic_Series series{ note.m_freq };
-	series.generate();
+	series.ovt_generate();
 
-	for (int i{}; i < series.m_series.size(); ++i)
-	{
-		Sine sine{};
-		sine.init(amplitude, series.m_series[i], duration);
-		sine.write(ofs);
-
-		postwr_pos = sine.m_postwr_pos;
-	}
+	series.add_series(ofs, 0.75, 1.5);
 
 	header.header_c(postwr_pos);
 
