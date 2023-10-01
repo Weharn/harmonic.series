@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <limits>
 
 const long bitrate{ 44100 };
 const int bitdepth{ 16 };
@@ -10,6 +11,12 @@ const float pi{ 3.1416f };
 /* WIP. getting all inital frequency data from the file is done. Then the maths to find the harmonic series should be quite simple, then 
 * I can feed that into some form of pattern class which will store the series and have a process to create the waveform vector.
 * then I'll just write that to file and Robbie's my uncle. */
+
+void clearCin()
+{
+	std::cin.clear();
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max());
+}
 
 class Note
 {
@@ -24,8 +31,14 @@ public:
 		std::string note_input{};
 		std::string file_freq{};
 
+		system("cls");
+
+    invalid_input:
+
 		std::cout << "Enter a note: ";
 		std::cin >> note_input;
+
+		std::toupper(note_input[0]);
 
 		if (note_input.size() == 3)					//if the note has a sharp or flat
 		{
@@ -41,8 +54,10 @@ public:
 			}
 			else
 			{
-				std::cerr << "Invalid modifier on note (i.e. D@ instead of D#)";
-				std::abort();
+				clearCin();							//if an invalid modifier was used
+				std::cout << "Invalid modifier on note (i.e. D@ instead of D#). Please try again.";
+				note_input = "\0";
+				goto invalid_input;
 			}
 
 			m_octave = note_input[2] - 48;
@@ -70,8 +85,10 @@ public:
 				break;
 
 			default:
-				std::cerr << "Incorrect note input (i.e. F-flat, or Q).";
-				std::abort();
+				clearCin();							//if the inputted note doesn't exist
+				std::cout << "Invalid note (i.e. P instead of a letter from A to G, or E#, Fb, B#, Cb. These notes are other natural notes.). Please try again.";
+				note_input = "\0";
+				goto invalid_input;
 			}
 		}
 		else if (note_input.size() == 2)				//if the note is a natural
@@ -110,8 +127,10 @@ public:
 				break;
 
 			default:
-				std::cerr << "Invalding note inputted (i.e. Q)";
-				std::abort();
+				clearCin();							//if the inputted note doesn't exist
+				std::cout << "Invalid note (i.e. P instead of a letter from A to G, or E#, Fb, B#, Cb. These notes are other natural notes.). Please try again.";
+				note_input = "\0";
+				goto invalid_input;
 			}
 		}
 		else
@@ -198,7 +217,7 @@ public:
 		}
 	}   
 
-	void undt_generation()				//generates the undertone harmonic series
+	void undt_generate()				//generates the undertone harmonic series
 	{
 		for (float i{ 1 }; i <= 16.05; i += 1)
 		{
@@ -337,14 +356,45 @@ public:
 
 };
 
-int main()
+void run()
 {
-	double duration{ 2 };
-	float amplitude{ 0.75 };
+	double duration{};
+	float amplitude{};
 	int postwr_pos{};
+
+invalid_dur:
+	std::cout << "Enter duration per note (seconds): ";
+	std::cin >> duration;
+
+	if (duration <= 0)				//in case duration has an invalid value
+	{
+		duration = 0;
+		clearCin();
+		std::cout << "You gave duration as zero (no sound will play) or a negative number (impossible). Please try again.\n";
+		goto invalid_dur;
+	}
+
+	system("cls");
+
+invalid_amp:
+	std::cout << "Enter amplitude (zero to one scale): ";
+	std::cin >> amplitude;
+
+	if (amplitude <= 0 || amplitude > 1)				//in case amplitude has an invalid value
+	{
+		amplitude = 0;
+		clearCin();
+		std::cout << "Invalid value for amplitude. Please try again.\n";
+		goto invalid_amp;
+	}
 
 	Note note{};
 	note.get_note();
+}
+
+int main()
+{
+	
 
 	std::ofstream ofs{};
 	ofs.open(("C:\\Users\\finnv\\source\\repos\\harmonic.series\\harmonic.series\\harmonic.series.wav"), std::ios::binary);
@@ -353,7 +403,7 @@ int main()
 	header.header_i();
 
 	Harmonic_Series series{ note.m_freq };
-	series.ovt_generate();
+	series.undt_generate();
 
 	series.merge_series(ofs, 0.75, 1.5);
 
