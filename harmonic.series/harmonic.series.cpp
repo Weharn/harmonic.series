@@ -370,7 +370,7 @@ void run()
 	char over_under{};
 	char seq_lay{};
 
-invalid_dur:
+invalid_dur:						//in case duration has an invalid value; this block learns the duration per note
 	std::cout << "Enter duration per note (seconds): ";
 	std::cin >> duration;
 
@@ -384,7 +384,7 @@ invalid_dur:
 
 	system("cls");
 
-invalid_amp:
+invalid_amp:						//in case amplitude has an invalid value; this block learns the amplitude
 	std::cout << "Enter amplitude (zero to one scale): ";
 	std::cin >> amplitude;
 
@@ -402,12 +402,13 @@ invalid_amp:
 	note.get_note();
 	Harmonic_Series series{ note.m_freq };
 
-invalid_ou:
+invalid_ou:							//in case the choice was invalid; this block learns whether an under- or over- tone series is to be created.
 	std::cout << "Would you like to generate the overtone or undertone series? (O/U): ";
 	std::cin >> over_under;
 
 	over_under = std::toupper(over_under);
 
+	//this block creates the m_series vector within the series variable declared earlier
 	if (over_under == 'O')
 	{
 		series.ovt_generate();
@@ -430,9 +431,9 @@ invalid_ou:
 	int path_terminus{ -1 };
 	std::string str_path{};
 
-	GetModuleFileName(NULL, path, 256);
+	GetModuleFileName(NULL, path, 256);						//finds the current path
 
-	for (int i{}; (i < 256 && i != path_terminus); ++i)
+	for (int i{}; (i < 256 && i != path_terminus); ++i)		//finds location of the end of the path within the string
 	{
 		if (path[i] == '\0')
 		{
@@ -440,14 +441,14 @@ invalid_ou:
 		}
 	}
 
-	for (int i{ 0 }; i < (path_terminus - 20); ++i)
+	for (int i{ 0 }; i < (path_terminus - 20); ++i)			//deletes the "\\harmonic.series.exe" from the end
 	{
 		str_path.push_back(path[i]);
 	}
 
-	str_path += "\\harmonic_series.wav";
+	str_path += "\\harmonic_series.wav";					//adds the filename to the path
 
-	std::ofstream ofs(str_path, std::ios::binary);
+	std::ofstream ofs(str_path, std::ios::binary);			//opens the filestream
 
 	if (!ofs.is_open())
 	{
@@ -456,9 +457,9 @@ invalid_ou:
 	}
 
 	Header header(ofs);
-	header.header_i();
+	header.header_i();										//writes the header for the .wav file
 
-invalid_sl:
+invalid_sl:				//in case the choice is invalid; this block finds the form in which the user wants to write the series, then writes the series
 	std::cout << "Would you like create the series in a sequential or layered form (S/L): ";
 	std::cin >> seq_lay;
 
@@ -482,7 +483,7 @@ invalid_sl:
 
 	system("cls");
 
-	header.header_c(postwr_pos);
+	header.header_c(postwr_pos);							//writes the footer for the .wav file
 
 	std::cout << "Done!\n\n";
 }
