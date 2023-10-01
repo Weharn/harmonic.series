@@ -135,15 +135,19 @@ public:
 		}
 		else
 		{
-			std::cerr << "Incorrect note input (i.e. F-flat, or Q). Specifially, wrong number of characters in note name.";
-			std::abort();
+			clearCin();							//if the string contains the wrong number of characters
+			std::cerr << "Incorrect note input - wrong number of characters in note name. Please try again.";
+			note_input = "\0";
+			goto invalid_input;
 		}
 
 		std::ifstream ifs("frequencies.txt");
 
-		if (!ifs)
+		if (!ifs)					//in case the filestream fails to open
 		{
-			std::cerr << "Error opening the file frequencies.txt; please check the path.";
+			std::cout << "Error opening the file frequencies.txt; please check that the file exists under this name in the same directory as this program.\n";
+			std::cout << "If it does not, it can be downloaded from <https://github.com/Weharn/harmonic.series>. The program will close wheen you continue.\n";
+			system("pause");
 			std::abort();
 		}
 
