@@ -16,7 +16,7 @@ const float pi{ 3.1416f };
 void clearCin()
 {
 	std::cin.clear();
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max());
+	std::cin.ignore(9999999999, '\n');
 }
 
 class Note
@@ -34,12 +34,13 @@ public:
 
 		system("cls");
 
-    invalid_input:
-
+invalid_input:
 		std::cout << "Enter a note: ";
 		std::cin >> note_input;
 
-		std::toupper(note_input[0]);
+		note_input[0] = std::toupper(note_input[0]);
+
+		system("cls");
 
 		if (note_input.size() == 3)					//if the note has a sharp or flat
 		{
@@ -48,7 +49,7 @@ public:
 				m_name[0] = static_cast<char>(note_input[0] + 1);	//changes it to be the note above but flattened, as all notes are stored as flattened naturals.
 				m_name[1] = 'b';
 			}										
-			else if (note_input[1] = 'b') 			//if it's flat
+			else if (note_input[1] == 'b') 			//if it's flat
 			{
 				m_name[0] = note_input[0];
 				m_name[1] = note_input[1];
@@ -56,7 +57,7 @@ public:
 			else
 			{
 				clearCin();							//if an invalid modifier was used
-				std::cout << "Invalid modifier on note (i.e. D@ instead of D#). Please try again.";
+				std::cout << "Invalid modifier on note (i.e. D@ instead of D#). Please try again.\n";
 				note_input = "\0";
 				goto invalid_input;
 			}
@@ -87,7 +88,7 @@ public:
 
 			default:
 				clearCin();							//if the inputted note doesn't exist
-				std::cout << "Invalid note (i.e. P instead of a letter from A to G, or E#, Fb, B#, Cb. These notes are other natural notes.). Please try again.";
+				std::cout << "Invalid note (i.e. P instead of a letter from A to G, or E#, Fb, B#, Cb. These notes are other natural notes.). \nPlease try again.\n";
 				note_input = "\0";
 				goto invalid_input;
 			}
@@ -129,7 +130,7 @@ public:
 
 			default:
 				clearCin();							//if the inputted note doesn't exist
-				std::cout << "Invalid note (i.e. P instead of a letter from A to G, or E#, Fb, B#, Cb. These notes are other natural notes.). Please try again.";
+				std::cout << "Invalid note (i.e. P instead of a letter from A to G, or E#, Fb, B#, Cb. These notes are other natural notes.). \nPlease try again.\n";
 				note_input = "\0";
 				goto invalid_input;
 			}
@@ -137,7 +138,7 @@ public:
 		else
 		{
 			clearCin();							//if the string contains the wrong number of characters
-			std::cerr << "Incorrect note input - wrong number of characters in note name. Please try again.";
+			std::cerr << "Incorrect note input - wrong number of characters in note name. Please try again.\n";
 			note_input = "\0";
 			goto invalid_input;
 		}
@@ -403,7 +404,7 @@ invalid_ou:
 	std::cout << "Would you like to generate the overtone or undertone series? (O/U): ";
 	std::cin >> over_under;
 
-	std::toupper(over_under);
+	over_under = std::toupper(over_under);
 
 	if (over_under == 'O')
 	{
@@ -420,8 +421,6 @@ invalid_ou:
 		over_under = '\0';
 		goto invalid_ou;
 	}
-
-
 
 	std::ofstream ofs{};
 	wchar_t path[256];
@@ -454,22 +453,14 @@ invalid_sl:
 		goto invalid_sl;
 	}
 
-
 	header.header_c(postwr_pos);
+
+	std::cout << "Done!";
 }
 
 int main()
 {
-	
-
-	
-
-	
-	
-
-
-
-	std::cout << "Done!";
+	run();
 
 	return 0;
 }
