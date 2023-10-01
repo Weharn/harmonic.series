@@ -424,12 +424,12 @@ invalid_ou:							//in case the choice was invalid; this block learns whether an
 	system("cls");
 
 	wchar_t path[256];
-	int path_terminus{ -1 };
-	std::string str_path{};
+	/*int path_terminus{-1};
+	std::string str_path{};*/
 
 	GetModuleFileName(NULL, path, 256);						//finds the current path
 
-	for (int i{}; (i < 256 && i != path_terminus); ++i)		//finds location of the end of the path within the string
+	/*for (int i{}; (i < 256 && i != path_terminus); ++i)		//finds location of the end of the path within the string
 	{
 		if (path[i] == '\0')
 		{
@@ -442,9 +442,11 @@ invalid_ou:							//in case the choice was invalid; this block learns whether an
 		str_path.push_back(path[i]);
 	}
 
-	str_path += "\\harmonic_series.wav";					//adds the filename to the path
+	str_path += "\\harmonic_series.wav";					//adds the filename to the path*/
 
-	std::ofstream ofs(str_path, std::ios::binary);			//opens the filestream
+	std::filesystem::path(path).replace_filename("harmonic_series.wav");
+
+	std::ofstream ofs(path, std::ios::binary);			//opens the filestream
 
 	if (!ofs.is_open())
 	{
