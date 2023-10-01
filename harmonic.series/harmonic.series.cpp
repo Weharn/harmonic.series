@@ -396,6 +396,8 @@ invalid_amp:
 		goto invalid_amp;
 	}
 
+	system("cls");
+
 	Note note{};
 	note.get_note();
 	Harmonic_Series series{ note.m_freq };
@@ -422,16 +424,38 @@ invalid_ou:
 		goto invalid_ou;
 	}
 
+	system("cls");
+
 	std::ofstream ofs{};
 	wchar_t path[256];
+	int path_terminus{ -1 };
+	std::string str_path{};
 
 	GetModuleFileName(NULL, path, 256);
 
-	ofs.open((path), std::ios::binary);
+	for (int i{}; (i < 256 && i != path_terminus); ++i)
+	{
+		if (path[i] == '\0')
+		{
+			path_terminus = i;
+		}
+	}
+
+	for (int i{ 0 }; i < (path_terminus - 20); ++i)
+	{
+		str_path.push_back(path[i]);
+	}
+
+	ofs.open((str_path), std::ios::binary);
+
+	if (!ofs.is_open())
+	{
+		std::cerr << "failed to open the ofs";
+		std::abort();
+	}
 
 	Header header(ofs);
 	header.header_i();
-
 
 invalid_sl:
 	std::cout << "Would you like create the series in a sequential or layered form (S/L): ";
@@ -455,14 +479,18 @@ invalid_sl:
 		goto invalid_sl;
 	}
 
+	system("cls");
+
 	header.header_c(postwr_pos);
 
-	std::cout << "Done!";
+	std::cout << "Done!\n\n";
 }
 
 int main()
 {
 	run();
+
+	system("pause");
 
 	return 0;
 }
