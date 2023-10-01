@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <limits>
+#include <Windows.h>
 
 const long bitrate{ 44100 };
 const int bitdepth{ 16 };
@@ -229,7 +230,7 @@ public:
 		}
 	}
 
-	void add_series(std::ofstream& ofs, float amplitude, float duration)			//writes the series directly to a file
+	void seq_series(std::ofstream& ofs, float amplitude, float duration)			//writes the series directly to a file
 	{
 		for (int i{ 1 }; i < m_series.size(); ++i)
 		{
@@ -241,7 +242,7 @@ public:
 		}
 	}
 
-	void merge_series(std::ofstream& ofs, float amplitude, float duration)
+	void lay_series(std::ofstream& ofs, float amplitude, float duration)
 	{
 		for (int i{ 1 }; i < m_series.size(); ++i)					//this loop runs through every harmonic
 		{
@@ -365,6 +366,8 @@ void run()
 	double duration{};
 	float amplitude{};
 	int postwr_pos{};
+	char over_under{};
+	char seq_lay{};
 
 invalid_dur:
 	std::cout << "Enter duration per note (seconds): ";
@@ -394,24 +397,77 @@ invalid_amp:
 
 	Note note{};
 	note.get_note();
+	Harmonic_Series series{ note.m_freq };
+
+invalid_ou:
+	std::cout << "Would you like to generate the overtone or undertone series? (O/U): ";
+	std::cin >> over_under;
+
+	std::toupper(over_under);
+
+	if (over_under == 'O')
+	{
+		series.ovt_generate();
+	}
+	else if (over_under == 'U')
+	{
+		series.undt_generate();
+	}
+	else									//in case the choice was invalid
+	{
+		std::cout << "Invalid choice. Enter O to generate the overtone series, or U to generate the undertone series. Please try again.\n";
+		clearCin();
+		over_under = '\0';
+		goto invalid_ou;
+	}
+
+
+
+	std::ofstream ofs{};
+	wchar_t path[256];
+
+	GetModuleFileName(NULL, path, 256);
+
+	ofs.open((path), std::ios::binary);
+
+	Header header(ofs);
+	header.header_i();
+
+
+invalid_sl:
+	std::cout << "Would you like create the series in a sequential or layered form (S/L): ";
+	std::cin >> seq_lay;
+
+	if (seq_lay == 'S')
+	{
+		series.seq_series(ofs, amplitude, duration);
+	}
+	else if (seq_lay == 'L')
+	{
+		series.lay_series(ofs, amplitude, duration);
+	}
+	else									//in case the choice was invalid
+	{
+		std::cout << "Invalid choice. Enter S to generate the sequential form, or L to generate the layered form. Please try again.\n";
+		clearCin();
+		seq_lay = '\0';
+		goto invalid_sl;
+	}
+
+
+	header.header_c(postwr_pos);
 }
 
 int main()
 {
 	
 
-	std::ofstream ofs{};
-	ofs.open(("C:\\Users\\finnv\\source\\repos\\harmonic.series\\harmonic.series\\harmonic.series.wav"), std::ios::binary);
+	
 
-	Header header(ofs);
-	header.header_i();
+	
+	
 
-	Harmonic_Series series{ note.m_freq };
-	series.undt_generate();
 
-	series.merge_series(ofs, 0.75, 1.5);
-
-	header.header_c(postwr_pos);
 
 	std::cout << "Done!";
 
