@@ -426,7 +426,6 @@ invalid_ou:
 
 	system("cls");
 
-	std::ofstream ofs{};
 	wchar_t path[256];
 	int path_terminus{ -1 };
 	std::string str_path{};
@@ -446,7 +445,9 @@ invalid_ou:
 		str_path.push_back(path[i]);
 	}
 
-	ofs.open((str_path), std::ios::binary);
+	str_path += "\\harmonic_series.wav";
+
+	std::ofstream ofs(str_path, std::ios::binary);
 
 	if (!ofs.is_open())
 	{
