@@ -437,6 +437,8 @@ invalid_sl:
 	std::cout << "Would you like create the series in a sequential or layered form (S/L): ";
 	std::cin >> seq_lay;
 
+	seq_lay = std::toupper(seq_lay);
+
 	if (seq_lay == 'S')
 	{
 		series.seq_series(ofs, amplitude, duration);
