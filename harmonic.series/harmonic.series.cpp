@@ -355,7 +355,7 @@ int main()
 	Harmonic_Series series{ note.m_freq };
 	series.ovt_generate();
 
-	series.add_series(ofs, 0.75, 1.5);
+	series.merge_series(ofs, 0.75, 1.5);
 
 	header.header_c(postwr_pos);
 
