@@ -9,10 +9,6 @@ const long bitrate{ 44100 };
 const int bitdepth{ 16 };
 const float pi{ 3.1416f };
 
-/* WIP. getting all inital frequency data from the file is done. Then the maths to find the harmonic series should be quite simple, then 
-* I can feed that into some form of pattern class which will store the series and have a process to create the waveform vector.
-* then I'll just write that to file and Robbie's my uncle. */
-
 void clearCin()
 {
 	std::cin.clear();
@@ -452,7 +448,8 @@ invalid_ou:							//in case the choice was invalid; this block learns whether an
 
 	if (!ofs.is_open())
 	{
-		std::cerr << "failed to open the ofs";
+		std::cout << "Failed to open the ofstream.\n\n";
+		system("pause");
 		std::abort();
 	}
 
