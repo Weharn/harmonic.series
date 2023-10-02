@@ -4,10 +4,11 @@
 #include <string>
 #include <limits>
 #include <Windows.h>
+#include <filesystem>
 
 const long bitrate{ 44100 };
 const int bitdepth{ 16 };
-const float pi{ 3.1416f };
+const double pi{ 3.1416f };
 
 void clearCin()
 {
@@ -153,7 +154,7 @@ invalid_input:
 																	//and the right octave within the collection (individual notes are in 8-character words)
 		std::getline(ifs, file_freq, ',');
 
-		m_freq = std::stof(file_freq);								//changes the string input into the float frequency
+		m_freq = std::stod(file_freq);								//changes the string input into the double frequency
 	}
 };
 
@@ -161,17 +162,17 @@ class Sine
 {
 private:
 
-	float m_angle{};		//the current "angle" of the sine wave
-	float m_step{};			//the "step" (increase in angle per iteration)
+	double m_angle{};		//the current "angle" of the sine wave
+	double m_step{};			//the "step" (increase in angle per iteration)
 
 public:
 
 	int m_postwr_pos{};
-	float m_amplitude{};
-	float m_frequency{};
-	float m_duration{};
+	double m_amplitude{};
+	double m_frequency{};
+	double m_duration{};
 
-	void init(float ampl, float freq, float durn)			//initialises all the variables and the step value
+	void init(double ampl, double freq, double durn)			//initialises all the variables and the step value
 	{
 		m_amplitude = ampl;
 		m_frequency = freq;
@@ -179,9 +180,9 @@ public:
 		m_step = sin(2 * pi * (m_frequency / bitrate));
 	}
 
-	float gen_sine()										//generates an indiviual sample (range: -1 to 1), then increments the angle by the step
+	double gen_sine()										//generates an indiviual sample (range: -1 to 1), then increments the angle by the step
 	{
-		float sample{ sin(m_angle) };
+		double sample{ sin(m_angle) };
 
 		m_angle += m_step;
 
@@ -207,9 +208,9 @@ class Harmonic_Series
 {
 public:
 
-	float m_frequency{};
+	double m_frequency{};
 	int m_postwr_pos{};	
-	std::vector<float> m_series{ 0 };
+	std::vector<double> m_series{ 0 };
 
 	void ovt_generate()					//generates the overtone harmonic series
 	{
@@ -221,13 +222,13 @@ public:
 
 	void undt_generate()				//generates the undertone harmonic series
 	{
-		for (float i{ 1 }; i <= 16.05; i += 1)
+		for (double i{ 1 }; i <= 16.05; i += 1)
 		{
 			m_series.push_back(m_frequency * (1/i));
 		}
 	}
 
-	void seq_series(std::ofstream& ofs, float amplitude, float duration)			//writes the series directly to a file
+	void seq_series(std::ofstream& ofs, double amplitude, double duration)			//writes the series directly to a file
 	{
 		for (int i{ 1 }; i < m_series.size(); ++i)
 		{
@@ -239,7 +240,7 @@ public:
 		}
 	}
 
-	void lay_series(std::ofstream& ofs, float amplitude, float duration)
+	void lay_series(std::ofstream& ofs, double amplitude, double duration)
 	{
 		for (int i{ 1 }; i < m_series.size(); ++i)					//this loop runs through every harmonic
 		{
@@ -361,7 +362,7 @@ public:
 void run()
 {
 	double duration{};
-	float amplitude{};
+	double amplitude{};
 	int postwr_pos{};
 	char over_under{};
 	char seq_lay{};
@@ -423,28 +424,13 @@ invalid_ou:							//in case the choice was invalid; this block learns whether an
 
 	system("cls");
 
-	wchar_t path[256];
-	/*int path_terminus{-1};
-	std::string str_path{};*/
+	wchar_t cpath[256];
 
-	GetModuleFileName(NULL, path, 256);						//finds the current path
+	GetModuleFileName(NULL, cpath, 256);                             //finds the current path
 
-	/*for (int i{}; (i < 256 && i != path_terminus); ++i)		//finds location of the end of the path within the string
-	{
-		if (path[i] == '\0')
-		{
-			path_terminus = i;
-		}
-	}
+	std::filesystem::path path(cpath);
 
-	for (int i{ 0 }; i < (path_terminus - 20); ++i)			//deletes the "\\harmonic.series.exe" from the end
-	{
-		str_path.push_back(path[i]);
-	}
-
-	str_path += "\\harmonic_series.wav";					//adds the filename to the path*/
-
-	std::filesystem::path(path).replace_filename("harmonic_series.wav");
+	path.replace_filename("harmonic.series.wav");
 
 	std::ofstream ofs(path, std::ios::binary);			//opens the filestream
 
