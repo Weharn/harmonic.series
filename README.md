@@ -10,4 +10,4 @@ The lay_series process. This process creates a layered harmonic series. For ever
 
 The run() function packages everything up and does all the work to connect the other aspects of the program. It should work regardless of the machine or directory on or in which the program (and frequencies.txt) are located.
 
-However, inexplicably, when the program is built or debugged on the "Release" compiler configuraion in Visual Studio 2022, the ofstream never opens. It always works when the "Debug" configuration is used.
+The executable and frequencies.txt data file can be downloaded together as a zipped file. Feel free to use this program!
