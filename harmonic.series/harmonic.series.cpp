@@ -193,20 +193,20 @@ public:
 	{
 		auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };		//modifier to take the range from -1 to 1 to -32767 to 32767
 
-		for (int i{}; i < (bitrate * (m_duration - 0.001)); ++i)
+		double period{ 0.5 * (1 / m_frequency) };
+
+		for (int i{}; i < (bitrate * (m_duration - period)); ++i)
 		{
 			int sample{ static_cast<int>(gen_sine() * amplmod) };		//does the final modification and casts the sample to an int as required
 
 			ofs.write((reinterpret_cast<char*>(&sample)), 2);
 		}
 
-		m_angle -= m_step;
-
 		int last_sample{ static_cast<int>(gen_sine() * amplmod) };
 
-		int decay_step{ static_cast<int>(last_sample / (bitrate * 0.001)) };
+		int decay_step{ static_cast<int>(last_sample / (bitrate * period)) };
 
-		for (int i{}; i <= bitrate * 0.001; ++i)
+		for (int i{}; i <= bitrate * period; ++i)
 		{
 			ofs.write((reinterpret_cast<char*>(&last_sample)), 2);
 
