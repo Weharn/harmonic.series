@@ -5,6 +5,7 @@
 #include <limits>
 #include <Windows.h>
 #include <filesystem>
+#include <cmath>
 
 const long bitrate{ 44100 };
 const int bitdepth{ 16 };
@@ -171,6 +172,7 @@ public:
 	double m_amplitude{};
 	double m_frequency{};
 	double m_duration{};
+	double m_period{};
 
 	void init(double ampl, double freq, double durn)			//initialises all the variables and the step value
 	{
@@ -178,6 +180,7 @@ public:
 		m_frequency = freq;
 		m_duration = durn;
 		m_step = sin(2 * pi * (m_frequency / bitrate));
+		m_period = 0.25 * (1 / m_frequency);
 	}
 
 	double gen_sine()										//generates an indiviual sample (range: -1 to 1), then increments the angle by the step
@@ -193,9 +196,7 @@ public:
 	{
 		auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };		//modifier to take the range from -1 to 1 to -32767 to 32767
 
-		double period{ 0.5 * (1 / m_frequency) };
-
-		for (int i{}; i < (bitrate * (m_duration - period)); ++i)
+		for (int i{}; i < (bitrate * (m_duration - m_period)); ++i)
 		{
 			int sample{ static_cast<int>(gen_sine() * amplmod) };		//does the final modification and casts the sample to an int as required
 
@@ -204,9 +205,9 @@ public:
 
 		int last_sample{ static_cast<int>(gen_sine() * amplmod) };
 
-		int decay_step{ static_cast<int>(last_sample / (bitrate * period)) };
+		int decay_step{ static_cast<int>(last_sample / (bitrate * m_period)) };
 
-		for (int i{}; i <= bitrate * period; ++i)
+		for (int i{}; i <= bitrate * m_period; ++i)
 		{
 			ofs.write((reinterpret_cast<char*>(&last_sample)), 2);
 
@@ -272,12 +273,26 @@ public:
 
 				auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };		//modifier to take the range from -1 to 1 to -32767 to 32767
 
-				for (int i{}; i < (bitrate * duration); ++i)
+				for (int j{}; j < (bitrate * (duration - sine2.m_period)); ++j)
 				{	
 					//does the final modification and casts the sample to an int as required
 					int sample{ static_cast<int>(((sine1.gen_sine() * 0.5) + (sine2.gen_sine() * 0.5)) * amplmod)};		
 
 					ofs.write((reinterpret_cast<char*>(&sample)), 2);
+				}
+
+				double last_angle{ (sine1.gen_sine() * 0.5) + (sine2.gen_sine() * 0.5) };
+
+				double decay_step{ last_angle / (bitrate * sine2.m_period) };
+
+				for (int j{}; j < (bitrate * sine2.m_period); ++j)
+				{
+					//does the final modification and casts the sample to an int as required
+					int sample{ static_cast<int>(((sine1.gen_sine() * 0.5) * last_angle) * amplmod) };
+
+					ofs.write((reinterpret_cast<char*>(&sample)), 2);
+
+					last_angle -= decay_step;
 				}
 			}
 			else if (i > 2 && i < m_series.size())
@@ -294,6 +309,7 @@ public:
 				}
 
 				double vecsize_recip{ 1 / static_cast<double>(series_vec.size()) };		//saves having to keep redoing some intensive work
+
 
 				for (int j{}; j < (bitrate * duration); ++j)
 				{
