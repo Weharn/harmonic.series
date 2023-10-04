@@ -273,25 +273,23 @@ public:
 
 				auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };		//modifier to take the range from -1 to 1 to -32767 to 32767
 
+				int sample{};
+
 				for (int j{}; j < (bitrate * (duration - sine2.m_period)); ++j)
 				{	
 					//does the final modification and casts the sample to an int as required
-					int sample{ static_cast<int>(((sine1.gen_sine() * 0.5) + (sine2.gen_sine() * 0.5)) * amplmod)};		
+					sample = static_cast<int>(((sine1.gen_sine() * 0.5) + (sine2.gen_sine() * 0.5)) * amplmod);		
 
 					ofs.write((reinterpret_cast<char*>(&sample)), 2);
 				}
-
-				double last_angle{ (sine1.gen_sine() * 0.5) + (sine2.gen_sine() * 0.5) };				//the place to start from in the decay
 					
-				double decay_step{ last_angle / (bitrate * sine2.m_period) };							//the distance to zero divided by the number of samples left before the next note
+				double decay_step{ sample / (bitrate * sine2.m_period) };								//the distance to zero divided by the number of samples left before the next note
 
 				for (int j{}; j < (bitrate * sine2.m_period); ++j)										//for the decay section
 				{
-					int sample{ static_cast<int>(((sine1.gen_sine() * 0.5) * last_angle) * amplmod) };	//does the final modification and casts the sample to an int as required
+					sample -= decay_step;
 
-					ofs.write((reinterpret_cast<char*>(&sample)), 2);
-
-					last_angle -= decay_step;						//creates the next relevant sample		
+					ofs.write((reinterpret_cast<char*>(&sample)), 2);	
 				}
 			}
 			else if (i > 2 && i < m_series.size())
