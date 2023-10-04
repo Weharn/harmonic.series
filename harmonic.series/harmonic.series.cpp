@@ -327,7 +327,7 @@ public:
 
 				int decay_step{ static_cast<int>(isum / (bitrate * series_vec.back().m_period))};		//the distance to zero divided by the number of samples left before the next note
 
-				for (int j{}; j < (bitrate * series_vec.back().m_period); ++j)										//for the decay section
+				for (int j{}; !(isum >= 500 || isum <= -500); ++j)										//for the decay section
 				{
 					isum -= decay_step;
 
