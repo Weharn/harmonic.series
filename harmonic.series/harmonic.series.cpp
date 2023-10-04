@@ -7,7 +7,7 @@
 #include <filesystem>
 #include <cmath>
 
-const long bitrate{ 44100 };
+const long bitrate{ 48000 };
 const int bitdepth{ 16 };
 const double pi{ 3.1416f };
 
@@ -309,10 +309,11 @@ public:
 
 				double vecsize_recip{ 1 / static_cast<double>(series_vec.size()) };		//saves having to keep redoing some intensive work
 
+				double sum{};
 
 				for (int j{}; j < (bitrate * duration); ++j)
 				{
-					double sum{};														//current sum of all the sine objects within the vector for a given step
+					sum = 0;															//current sum of all the sine objects within the vector for a given step
 
 					for (int k{}; k < series_vec.size(); ++k)
 					{
@@ -323,6 +324,8 @@ public:
 
 					ofs.write((reinterpret_cast<char*>(&sample)), 2);					//writes to file
 				}
+
+
 			}
 			else
 			{
