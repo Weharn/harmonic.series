@@ -325,9 +325,7 @@ public:
 
 				int isum{ static_cast<int>(sum * bitrate) };
 
-				int decay_step{ static_cast<int>(sum / (bitrate * series_vec.back().m_period))};		//the distance to zero divided by the number of samples left before the next note
-
-
+				int decay_step{ static_cast<int>(isum / (bitrate * series_vec.back().m_period))};		//the distance to zero divided by the number of samples left before the next note
 
 				for (int j{}; j < (bitrate * series_vec.back().m_period); ++j)										//for the decay section
 				{
