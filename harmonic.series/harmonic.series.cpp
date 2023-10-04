@@ -309,7 +309,7 @@ public:
 
 				double sum{};
 
-				for (int j{}; j < (bitrate * duration); ++j)
+				for (int j{}; j < (bitrate * (duration - series_vec.back().m_period)); ++j)
 				{
 					sum = 0;															//current sum of all the sine objects within the vector for a given step
 
@@ -327,7 +327,7 @@ public:
 
 				int decay_step{ static_cast<int>(isum / (bitrate * series_vec.back().m_period))};		//the distance to zero divided by the number of samples left before the next note
 
-				for (int j{}; !(isum >= 500 || isum <= -500); ++j)										//for the decay section
+				for (int j{}; j < bitrate * series_vec.back().m_period; ++j)										//for the decay section -- this should be <not(>=500) || not(<=500)>
 				{
 					isum -= decay_step;
 
