@@ -285,7 +285,7 @@ public:
 					
 				double decay_step{ sample / (bitrate * sine2.m_period) };								//the distance to zero divided by the number of samples left before the next note
 
-				for (int j{}; j < (bitrate * sine2.m_period); ++j)										//for the decay section
+				for (int j{}; j < (amplmod * sine2.m_period); ++j)										//for the decay section
 				{
 					sample -= decay_step;
 
@@ -323,7 +323,7 @@ public:
 					ofs.write((reinterpret_cast<char*>(&sample)), 2);					//writes to file
 				}
 
-				int isum{ static_cast<int>(sum * bitrate) };
+				int isum{ static_cast<int>(sum * amplmod) };
 
 				int decay_step{ static_cast<int>(isum / (bitrate * series_vec.back().m_period))};		//the distance to zero divided by the number of samples left before the next note
 
