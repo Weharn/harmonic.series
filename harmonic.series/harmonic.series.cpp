@@ -256,7 +256,7 @@ public:
 
 	void lay_series(std::ofstream& ofs, double amplitude, double duration)
 	{
-		for (int i{ 1 }; i < m_series.size(); ++i)										//this loop runs through every harmonic
+		for (int i{ 1 }; i < m_series.size(); ++i)					//this loop runs through every harmonic
 		{
 			if (i == 1)												//these first two if statements are just to reduce some of the load when it is less necessary
 			{
@@ -271,7 +271,7 @@ public:
 				Sine sine2 {};
 				sine2.init(amplitude, m_series[i], duration);
 
-				auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };							//modifier to take the range from -1 to 1 to -32767 to 32767
+				auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };		//modifier to take the range from -1 to 1 to -32767 to 32767
 
 				for (int j{}; j < (bitrate * (duration - sine2.m_period)); ++j)
 				{	
@@ -281,9 +281,9 @@ public:
 					ofs.write((reinterpret_cast<char*>(&sample)), 2);
 				}
 
-				double last_angle{ (sine1.gen_sine() * 0.5) + (sine2.gen_sine() * 0.5) };	//the place to start from in the decay
+				double last_angle{ (sine1.gen_sine() * 0.5) + (sine2.gen_sine() * 0.5) };				//the place to start from in the decay
 					
-				double decay_step{ last_angle / (bitrate * sine2.m_period) };			//the distance to zero divided by the number of samples left before the next note
+				double decay_step{ last_angle / (bitrate * sine2.m_period) };							//the distance to zero divided by the number of samples left before the next note
 
 				for (int j{}; j < (bitrate * sine2.m_period); ++j)										//for the decay section
 				{
@@ -296,8 +296,8 @@ public:
 			}
 			else if (i > 2 && i < m_series.size())
 			{
-				auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };							//modifier to take the range from -1 to 1 to -32767 to 32767
-				std::vector<Sine> series_vec{};											//a vector of sine objects. The plan is that they will all be .gen_sine 'd simultaneously and added every cycle
+				auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };		//modifier to take the range from -1 to 1 to -32767 to 32767
+				std::vector<Sine> series_vec{};						//a vector of sine objects. The plan is that they will all be .gen_sine 'd simultaneously and added every cycle
 
 				for (int j{ 1 }; j <= i; ++j)						//initialises the correct number of objects to the correct frequencies withing series_vec
 				{
@@ -309,11 +309,10 @@ public:
 
 				double vecsize_recip{ 1 / static_cast<double>(series_vec.size()) };		//saves having to keep redoing some intensive work
 
-				double sum{};															//current sum of all the sine objects within the vector for a given step
 
-				for (int j{}; j < (bitrate * (duration - series_vec.back().m_period)); ++j)
+				for (int j{}; j < (bitrate * duration); ++j)
 				{
-					sum = 0;
+					double sum{};														//current sum of all the sine objects within the vector for a given step
 
 					for (int k{}; k < series_vec.size(); ++k)
 					{
@@ -323,15 +322,6 @@ public:
 					int sample{ static_cast<int>(sum * amplmod) };						//prepares sum for writing to file
 
 					ofs.write((reinterpret_cast<char*>(&sample)), 2);					//writes to file
-				}
-
-				double decay_step{ sum / (bitrate * series_vec.back().m_period)};		//the distance to zero divided by the number of samples left before the next note
-
-				for (int j{}; j < (bitrate * series_vec.emplace_back().m_period); ++j)
-				{
-					sum -= decay_step;
-
-					ofs.write((reinterpret_cast<char*>(&sum)), 2);						//writes the decay section to file
 				}
 			}
 			else
