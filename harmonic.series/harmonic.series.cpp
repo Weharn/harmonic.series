@@ -323,13 +323,17 @@ public:
 					ofs.write((reinterpret_cast<char*>(&sample)), 2);					//writes to file
 				}
 
+				int isum{ static_cast<int>(sum * bitrate) };
+
 				int decay_step{ static_cast<int>(sum / (bitrate * series_vec.back().m_period))};		//the distance to zero divided by the number of samples left before the next note
+
+
 
 				for (int j{}; j < (bitrate * series_vec.back().m_period); ++j)										//for the decay section
 				{
-					sum -= decay_step;
+					isum -= decay_step;
 
-					ofs.write((reinterpret_cast<char*>(&sum)), 2);
+					ofs.write((reinterpret_cast<char*>(&isum)), 2);
 				}
 			}
 			else
