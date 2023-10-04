@@ -164,7 +164,7 @@ class Sine
 private:
 
 	double m_angle{};		//the current "angle" of the sine wave
-	double m_step{};			//the "step" (increase in angle per iteration)
+	double m_step{};		//the "step" (increase in angle per iteration)
 
 public:
 
@@ -172,9 +172,9 @@ public:
 	double m_amplitude{};
 	double m_frequency{};
 	double m_duration{};
-	double m_period{};
-
-	void init(double ampl, double freq, double durn)			//initialises all the variables and the step value
+	double m_period{};		//period is the reciprocal of frequency, here multiplied by 0.25 because that works better for this purpose
+		
+	void init(double ampl, double freq, double durn)					//initialises all the variables and the step value
 	{
 		m_amplitude = ampl;
 		m_frequency = freq;
@@ -183,7 +183,7 @@ public:
 		m_period = 0.25 * (1 / m_frequency);
 	}
 
-	double gen_sine()										//generates an indiviual sample (range: -1 to 1), then increments the angle by the step
+	double gen_sine()					//generates an indiviual sample (range: -1 to 1), then increments the angle by the step
 	{
 		double sample{ sin(m_angle) };
 
@@ -192,9 +192,9 @@ public:
 		return sample;
 	}
 
-	void write(std::ofstream& ofs)							//writes the wave to file directly
+	void write(std::ofstream& ofs)										//writes the wave to file directly
 	{
-		auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };		//modifier to take the range from -1 to 1 to -32767 to 32767
+		auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };					//modifier to take the range from -1 to 1 to -32767 to 32767
 
 		for (int i{}; i < (bitrate * (m_duration - m_period)); ++i)
 		{
@@ -203,13 +203,13 @@ public:
 			ofs.write((reinterpret_cast<char*>(&sample)), 2);
 		}
 
-		int last_sample{ static_cast<int>(gen_sine() * amplmod) };
+		int last_sample{ static_cast<int>(gen_sine() * amplmod) };					//the place to start from in the decay
 
-		int decay_step{ static_cast<int>(last_sample / (bitrate * m_period)) };
+		int decay_step{ static_cast<int>(last_sample / (bitrate * m_period)) };		//the distance to zero divided by the number of samples left before the next note
 
 		for (int i{}; i <= bitrate * m_period; ++i)
 		{
-			ofs.write((reinterpret_cast<char*>(&last_sample)), 2);
+			ofs.write((reinterpret_cast<char*>(&last_sample)), 2);					//does the final modification and casts the sample to an int as required
 
 			last_sample -= decay_step;
 		}
@@ -281,18 +281,17 @@ public:
 					ofs.write((reinterpret_cast<char*>(&sample)), 2);
 				}
 
-				double last_angle{ (sine1.gen_sine() * 0.5) + (sine2.gen_sine() * 0.5) };
+				double last_angle{ (sine1.gen_sine() * 0.5) + (sine2.gen_sine() * 0.5) };				//the place to start from in the decay
+					
+				double decay_step{ last_angle / (bitrate * sine2.m_period) };							//the distance to zero divided by the number of samples left before the next note
 
-				double decay_step{ last_angle / (bitrate * sine2.m_period) };
-
-				for (int j{}; j < (bitrate * sine2.m_period); ++j)
+				for (int j{}; j < (bitrate * sine2.m_period); ++j)										//for the decay section
 				{
-					//does the final modification and casts the sample to an int as required
-					int sample{ static_cast<int>(((sine1.gen_sine() * 0.5) * last_angle) * amplmod) };
+					int sample{ static_cast<int>(((sine1.gen_sine() * 0.5) * last_angle) * amplmod) };	//does the final modification and casts the sample to an int as required
 
 					ofs.write((reinterpret_cast<char*>(&sample)), 2);
 
-					last_angle -= decay_step;
+					last_angle -= decay_step;						//creates the next relevant sample		
 				}
 			}
 			else if (i > 2 && i < m_series.size())
