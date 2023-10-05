@@ -5,8 +5,9 @@
 #include <limits>
 #include <Windows.h>
 #include <filesystem>
+#include <cmath>
 
-const long bitrate{ 44100 };
+const long bitrate{ 48000 };
 const int bitdepth{ 16 };
 const double pi{ 3.1416f };
 
@@ -163,7 +164,7 @@ class Sine
 private:
 
 	double m_angle{};		//the current "angle" of the sine wave
-	double m_step{};			//the "step" (increase in angle per iteration)
+	double m_step{};		//the "step" (increase in angle per iteration)
 
 public:
 
@@ -171,16 +172,18 @@ public:
 	double m_amplitude{};
 	double m_frequency{};
 	double m_duration{};
-
-	void init(double ampl, double freq, double durn)			//initialises all the variables and the step value
+	double m_period{};		//period is the reciprocal of frequency, here multiplied by 0.25 because that works better for this purpose
+		
+	void init(double ampl, double freq, double durn)					//initialises all the variables and the step value
 	{
 		m_amplitude = ampl;
 		m_frequency = freq;
 		m_duration = durn;
 		m_step = sin(2 * pi * (m_frequency / bitrate));
+		m_period = 0.2 * (1 / m_frequency);
 	}
 
-	double gen_sine()										//generates an indiviual sample (range: -1 to 1), then increments the angle by the step
+	double gen_sine()					//generates an indiviual sample (range: -1 to 1), then increments the angle by the step
 	{
 		double sample{ sin(m_angle) };
 
@@ -189,15 +192,26 @@ public:
 		return sample;
 	}
 
-	void write(std::ofstream& ofs)							//writes the wave to file directly
+	void write(std::ofstream& ofs)										//writes the wave to file directly
 	{
-		auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };		//modifier to take the range from -1 to 1 to -32767 to 32767
+		auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };					//modifier to take the range from -1 to 1 to -32767 to 32767
 
-		for (int i{}; i < (bitrate * m_duration); ++i)
+		for (int i{}; i < (bitrate * (m_duration - m_period)); ++i)
 		{
 			int sample{ static_cast<int>(gen_sine() * amplmod) };		//does the final modification and casts the sample to an int as required
 
 			ofs.write((reinterpret_cast<char*>(&sample)), 2);
+		}
+
+		int last_sample{ static_cast<int>(gen_sine() * amplmod) };					//the place to start from in the decay
+
+		int decay_step{ static_cast<int>(last_sample / (bitrate * m_period)) };		//the distance to zero divided by the number of samples left before the next note
+
+		for (int i{}; i <= bitrate * m_period; ++i)
+		{
+			ofs.write((reinterpret_cast<char*>(&last_sample)), 2);					//does the final modification and casts the sample to an int as required
+
+			last_sample -= decay_step;
 		}
 
 		m_postwr_pos = ofs.tellp();
@@ -259,12 +273,23 @@ public:
 
 				auto amplmod{ (pow(2, (bitdepth - 1)) - 1) };		//modifier to take the range from -1 to 1 to -32767 to 32767
 
-				for (int i{}; i < (bitrate * duration); ++i)
+				int sample{};
+
+				for (int j{}; j < (bitrate * (duration - sine2.m_period)); ++j)
 				{	
 					//does the final modification and casts the sample to an int as required
-					int sample{ static_cast<int>(((sine1.gen_sine() * 0.5) + (sine2.gen_sine() * 0.5)) * amplmod)};		
+					sample = static_cast<int>(((sine1.gen_sine() * 0.5) + (sine2.gen_sine() * 0.5)) * amplmod);		
 
 					ofs.write((reinterpret_cast<char*>(&sample)), 2);
+				}
+					
+				double decay_step{ sample / (bitrate * sine2.m_period) };								//the distance to zero divided by the number of samples left before the next note
+
+				for (int j{}; j < (amplmod * sine2.m_period); ++j)										//for the decay section
+				{
+					sample -= decay_step;
+
+					ofs.write((reinterpret_cast<char*>(&sample)), 2);	
 				}
 			}
 			else if (i > 2 && i < m_series.size())
@@ -282,9 +307,11 @@ public:
 
 				double vecsize_recip{ 1 / static_cast<double>(series_vec.size()) };		//saves having to keep redoing some intensive work
 
-				for (int j{}; j < (bitrate * duration); ++j)
+				double sum{};
+
+				for (int j{}; j < (bitrate * (duration - series_vec.back().m_period)); ++j)
 				{
-					double sum{};														//current sum of all the sine objects within the vector for a given step
+					sum = 0;															//current sum of all the sine objects within the vector for a given step
 
 					for (int k{}; k < series_vec.size(); ++k)
 					{
@@ -295,6 +322,30 @@ public:
 
 					ofs.write((reinterpret_cast<char*>(&sample)), 2);					//writes to file
 				}
+
+				int isum{ static_cast<int>(sum * amplmod) };
+
+				int decay_step{ static_cast<int>(isum / (bitrate * series_vec.back().m_period))};		//the distance to zero divided by the number of samples left before the next note
+
+				if (isum <= -500)
+				{
+					for (int j{}; isum <= -500; ++j)										//for the decay section -- this should be <not(>=500) || not(<=500)>
+					{
+						isum -= decay_step;
+
+						ofs.write((reinterpret_cast<char*>(&isum)), 2);
+					}
+				}
+				else if (isum >= 500)
+				{
+					for (int j{}; isum >= -500; ++j)										//for the decay section -- this should be <not(>=500) || not(<=500)>
+					{
+						isum -= decay_step;
+
+						ofs.write((reinterpret_cast<char*>(&isum)), 2);
+					}
+				}
+							
 			}
 			else
 			{
