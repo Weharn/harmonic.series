@@ -180,7 +180,7 @@ public:
 		m_frequency = freq;
 		m_duration = durn;
 		m_step = sin(2 * pi * (m_frequency / bitrate));
-		m_period = 0.25 * (1 / m_frequency);
+		m_period = 0.2 * (1 / m_frequency);
 	}
 
 	double gen_sine()					//generates an indiviual sample (range: -1 to 1), then increments the angle by the step
