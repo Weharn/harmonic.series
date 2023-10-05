@@ -327,12 +327,25 @@ public:
 
 				int decay_step{ static_cast<int>(isum / (bitrate * series_vec.back().m_period))};		//the distance to zero divided by the number of samples left before the next note
 
-				for (int j{}; j < bitrate * series_vec.back().m_period; ++j)										//for the decay section -- this should be <not(>=500) || not(<=500)>
+				if (isum <= -500)
 				{
-					isum -= decay_step;
+					for (int j{}; isum <= -500; ++j)										//for the decay section -- this should be <not(>=500) || not(<=500)>
+					{
+						isum -= decay_step;
 
-					ofs.write((reinterpret_cast<char*>(&isum)), 2);
+						ofs.write((reinterpret_cast<char*>(&isum)), 2);
+					}
 				}
+				else if (isum >= 500)
+				{
+					for (int j{}; isum >= -500; ++j)										//for the decay section -- this should be <not(>=500) || not(<=500)>
+					{
+						isum -= decay_step;
+
+						ofs.write((reinterpret_cast<char*>(&isum)), 2);
+					}
+				}
+							
 			}
 			else
 			{
